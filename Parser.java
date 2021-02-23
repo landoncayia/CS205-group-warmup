@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.Scanner;
 
 public class Parser {
     private int number;
@@ -72,6 +73,23 @@ public class Parser {
     // main also loads the table a single time
 
     public static void main(String[] args) {
-        System.out.println("This is main");
+        Scanner input = new Scanner(System.in);
+        String userInput = "";
+
+        //menu and input loop
+        System.out.println("Welcome to the Best Picture data helper");
+        printHelp();
+        while(!userInput.toLowerCase().equals("exit")){
+            
+            userInput = input.nextLine();
+            if(validateInput(userInput)){
+                parseCommand(userInput);
+            }
+            else{
+                System.out.println("Command not understood. Write 'help' for the help menu or 'exit' to exit.");
+            }
+        }
+
+        input.close();
     }
 }
