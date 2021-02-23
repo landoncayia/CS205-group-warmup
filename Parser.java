@@ -46,7 +46,13 @@ public class Parser {
     // Isabelle
     public static void printHelp() {
         //prints the help menu
-        System.out.println("This is help");
+        System.out.println("-- HELP MENU --");
+        System.out.println("To close the program at any time, write 'exit'");
+        System.out.println("To request data about a movie, enter a command of the form [category] movie [movie name]");
+        System.out.println("Alternatively, you can request data about a movie based on the director with a command of the form [category] movie director [director name]");
+        System.out.println("Category options for movies are: name, release_year, nominations, rating, duration, genre");
+        System.out.println("To request data about a director, enter a command of the form [category] director [director name]");
+        System.out.println("Category options for directors are: year, movie, birth_year, gender");
     }
 
     // Landon
