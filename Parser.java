@@ -1,10 +1,19 @@
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.lang.model.util.ElementScanner14;
+
 import java.util.Scanner;
 
 public class Parser {
-    private int number;
+    static final List<String> PRIMARIES = Arrays.asList("movie", "director");
+    static final List<String> SECONDARIES_MOVIE =
+        Arrays.asList("director", "name", "release_year", "nominations", "rating", "duration", "genre");
+    static final List<String> SECONDARIES_DIRECTOR =
+        Arrays.asList("year", "director", "birth_year", "gender");
 
     // Eadoin and Zach need to be involved with this, but we can create a dummy table in the meantime.
     public static boolean loadTables() {
@@ -38,13 +47,6 @@ public class Parser {
     }
 
     // Isabelle
-    public static boolean validateInput(String input) {
-        // checks that the user has only entered valid commands and prints an error
-        // message otherwise
-        return false;
-    }
-
-    // Isabelle
     public static void printHelp() {
         //prints the help menu
         System.out.println("-- HELP MENU --");
@@ -56,7 +58,7 @@ public class Parser {
         System.out.println("Category options for directors are: year, movie, birth_year, gender");
     }
 
-    // Landon
+    // Isabelle
     public static void printData(String data) {
         // uses output from findData to print the requested data
     }
@@ -65,8 +67,59 @@ public class Parser {
     public static String[] parseCommand(String input) {
         // uses if statements and regex to determine what data the user is requesting,
         // then calls findData and printData to output the result
-        String[] placeHolder = new String[3];
-        return placeHolder;
+        if (input.equals("exit")) {
+            // Return empty array if there is an issue
+            return new String[0];
+        }
+
+        if (input.equals("help")) {
+            printHelp();
+            return new String[0];
+        }
+
+        String[] queryData = new String[3];
+
+        // enter regex pattern as a string
+        String pattern = "(?:(\\w+) (\\w+) \"?([\\w\\s]*)\"?)";
+
+        // create Pattern object
+        Pattern r = Pattern.compile(pattern);
+        
+        // create Matcher object
+        Matcher m = r.matcher(input);
+        if (m.find()) {
+            // Group 0 is the full match, i.e. the entire input string. The three after that (1, 2, 3) are the query parts
+            queryData[0] = m.group(1);
+            queryData[1] = m.group(2);
+            queryData[2] = m.group(3);
+        } else {
+            System.out.println("ERROR: You have entered a command that does not match the required format.\n"+
+                "Please ensure that you enter in the format:\n"+
+                "[secondary characteristic] [primary characteristic] (\")search query(\")");
+            return new String[0];
+        }
+
+        // validate the primary characteristic
+        if (!PRIMARIES.contains(queryData[1])) {
+            System.out.println("Your primary keyword (the second one) is not valid.\n"+
+                "Here are the valid primary keywords:\n" +
+                PRIMARIES+"\n");
+            return new String[0];
+        } else {
+            if (queryData[1].equals("movie") && !SECONDARIES_MOVIE.contains(queryData[0])) {
+                System.out.println("Your secondary keyword (the first one) is not valid.\n"+
+                    "Here are the valid secondary keywords for 'movie':\n" +
+                    SECONDARIES_MOVIE+"\n");
+                return new String[0];
+            }
+            if (queryData[1].equals("director") && !SECONDARIES_DIRECTOR.contains(queryData[0])) {
+                System.out.println("Your secondary keyword (the first one) is not valid.\n"+
+                    "Here are the valid secondary keywords for 'director':\n" +
+                    SECONDARIES_DIRECTOR+"\n");
+                return new String[0];
+            }
+        }
+        return queryData;
     }
 
     // main includes a while loop that constantly asks for and validates input until exit command
@@ -80,13 +133,19 @@ public class Parser {
         System.out.println("Welcome to the Best Picture data helper");
         printHelp();
         while(!userInput.toLowerCase().equals("exit")){
-            
             userInput = input.nextLine();
-            if(validateInput(userInput)){
-                parseCommand(userInput);
-            }
-            else{
-                System.out.println("Command not understood. Write 'help' for the help menu or 'exit' to exit.");
+            System.out.println();
+            String[] queryData = parseCommand(userInput);
+            if (queryData.length == 0) {
+                // If queryData is empty, then userInput does not contain a query
+                // and we should loop again.
+                if (!userInput.equals("exit") && !userInput.equals("help")) {
+                    System.out.println("Command not understood. Write 'help' for the help menu or 'exit' to exit.");
+                }
+            } else {
+                // Otherwise, send to findData to do the SQL query.
+                findData(queryData[0], queryData[1], queryData[2]);
+                System.out.println("\nReady for next command.\n");
             }
         }
 
