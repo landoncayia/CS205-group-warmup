@@ -136,13 +136,9 @@ public class Parser {
             userInput = input.nextLine();
             System.out.println();
             String[] queryData = parseCommand(userInput);
-            if (queryData.length == 0) {
+            if (!(queryData.length == 0)) {
                 // If queryData is empty, then userInput does not contain a query
                 // and we should loop again.
-                if (!userInput.equals("exit") && !userInput.equals("help")) {
-                    System.out.println("Command not understood. Write 'help' for the help menu or 'exit' to exit.");
-                }
-            } else {
                 // Otherwise, send to findData to do the SQL query.
                 findData(queryData[0], queryData[1], queryData[2]);
                 System.out.println("\nReady for next command.\n");
