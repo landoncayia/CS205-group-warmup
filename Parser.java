@@ -20,8 +20,68 @@ public class Parser {
     }
 
     // Eadoin and Zach
-    public static boolean populateTable(String table, String csv) {
-        // This method adds the data from the given csv into the table, returns boolean for
+    public static boolean populateTable1(String table, String csv) {
+        public static final String delimiter = ",";
+
+        // This reads the data from the csv
+        public static void read(String csvFile) {
+            try {
+                File file = new File(csvFile);
+                FileReader fr = new FileReader(file);
+                BufferedReader br = new BufferedReader(fr);
+                String line = "";
+                String[] tempArr;
+                while((line = br.readLine()) != null) {
+                    tempArr = line.split(delimiter);
+                    for(String tempStr : tempArr) {
+                        System.out.print(tempStr + " ");
+                    }
+                    System.out.println();
+                }
+                br.close();
+            } catch(IOException ioe) {
+                ioe.printStackTrace();
+            }
+        }
+        public static void main(String[] args) {
+            // csv file to read
+            String csvFile = "MovieDirectors.csv";
+            CSVReaderTest.read(csvFile);
+        }
+        // This method adds the data from the MovieDirectors csv into the table, returns boolean for
+        // whether it was successful or not.
+        return false;
+    }
+
+    public static boolean populateTable2(String table, String csv) {
+        public static final String delimiter = ",";
+
+        // This reads the data from the csv
+        public static void read(String csvFile) {
+            try {
+                File file = new File(csvFile);
+                FileReader fr = new FileReader(file);
+                BufferedReader br = new BufferedReader(fr);
+                String line = "";
+                String[] tempArr;
+                while((line = br.readLine()) != null) {
+                    tempArr = line.split(delimiter);
+                    for(String tempStr : tempArr) {
+                        System.out.print(tempStr + " ");
+                    }
+                    System.out.println();
+                }
+                br.close();
+            } catch(IOException ioe) {
+                ioe.printStackTrace();
+            }
+        }
+        public static void main(String[] args) {
+            // csv file to read
+            String csvFile = "BestMovies.csv";
+            CSVReaderTest.read(csvFile);
+        }
+        // This method adds the data from the BestMovies csv into the table, returns boolean for
         // whether it was successful or not.
         return false;
     }
