@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.lang.model.util.ElementScanner14;
-
 import java.util.Scanner;
 
 public class Parser {
@@ -51,11 +49,12 @@ public class Parser {
         //prints the help menu
         System.out.println("-- HELP MENU --");
         System.out.println("To close the program at any time, write 'exit'");
-        System.out.println("To request data about a movie, enter a command of the form [category] movie [movie name]");
-        System.out.println("Alternatively, you can request data about a movie based on the director with a command of the form [category] movie director [director name]");
+        System.out.println("To request data about a movie, enter a command of the form [category] movie \"[movie name]\"");
+        System.out.println("Alternatively, you can request data about a movie based on the director with a command of the form [category] \"movie director\" \"[director name]\"");
         System.out.println("Category options for movies are: name, release_year, nominations, rating, duration, genre");
-        System.out.println("To request data about a director, enter a command of the form [category] director [director name]");
+        System.out.println("To request data about a director, enter a command of the form [category] director \"[director name]\"");
         System.out.println("Category options for directors are: year, movie, birth_year, gender");
+        System.out.println("*** PLEASE NOTE *** that any use of quotes in the example above are required to group together the parts of the query.\n");
     }
 
     // Isabelle
@@ -80,7 +79,7 @@ public class Parser {
         String[] queryData = new String[3];
 
         // enter regex pattern as a string
-        String pattern = "(?:(\\w+) (\\w+) \"?([\\w\\s]*)\"?)";
+        String pattern = "(?:(\\w+) \"?([\\w\\s]*)\"? \"?([\\w\\s]*)\"?)";
 
         // create Pattern object
         Pattern r = Pattern.compile(pattern);
@@ -100,19 +99,45 @@ public class Parser {
         }
 
         // validate the primary characteristic
-        if (!PRIMARIES.contains(queryData[1])) {
-            System.out.println("Your primary keyword (the second one) is not valid.\n"+
-                "Here are the valid primary keywords:\n" +
-                PRIMARIES+"\n");
+        // first, split the second group (index 1) and check whether its length is 1 or 2
+        String[] splitGroup1 = queryData[1].split(" ");
+        // if length is one, check if it is either "director" or "movie"
+        if (splitGroup1.length == 1 && !PRIMARIES.contains(queryData[1])) {
+            System.out.println("Your primary keyword (the second word) is not valid.\n"+
+            "Here are the valid primary keywords (use one or a combo in quotes):\n"+
+            PRIMARIES+"\n");
             return new String[0];
-        } else {
+        }
+        // if length is two, check if it is either "director movie" or "movie director"
+        if (splitGroup1.length == 2 &&
+            (!PRIMARIES.contains(splitGroup1[0]) || !PRIMARIES.contains(splitGroup1[1]) || splitGroup1[0].equals(splitGroup1[1]))) {    
+            System.out.println("Your primary keyword combination is not valid\n"+
+            "Here are the valid primary keywords (use one or a combo in quotes):"+
+            PRIMARIES+"\n");
+            return new String[0];
+        }
+        
+        else {
+            // validate the secondary characteristic for a movie query
             if (queryData[1].equals("movie") && !SECONDARIES_MOVIE.contains(queryData[0])) {
                 System.out.println("Your secondary keyword (the first one) is not valid.\n"+
-                    "Here are the valid secondary keywords for 'movie':\n" +
-                    SECONDARIES_MOVIE+"\n");
+                                   "Here are the valid secondary keywords for 'movie':\n" +
+                                    SECONDARIES_MOVIE+"\n");
                 return new String[0];
             }
             if (queryData[1].equals("director") && !SECONDARIES_DIRECTOR.contains(queryData[0])) {
+                System.out.println("Your secondary keyword (the first one) is not valid.\n"+
+                                   "Here are the valid secondary keywords for 'director':\n" +
+                                    SECONDARIES_DIRECTOR+"\n");
+                return new String[0];
+            }
+            if (queryData[1].equals("movie director") && !SECONDARIES_MOVIE.contains(queryData[0])) {
+                System.out.println("Your secondary keyword (the first one) is not valid.\n"+
+                                   "Here are the valid secondary keywords for 'movie':\n"+
+                                    SECONDARIES_MOVIE+"\n");
+                return new String[0];
+            }
+            if (queryData[1].equals("director movie") && !SECONDARIES_DIRECTOR.contains(queryData[0])) {
                 System.out.println("Your secondary keyword (the first one) is not valid.\n"+
                     "Here are the valid secondary keywords for 'director':\n" +
                     SECONDARIES_DIRECTOR+"\n");
