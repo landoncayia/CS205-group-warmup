@@ -3,8 +3,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+import java.sql.*;
 import java.util.Scanner;
+import java.io.File;
+import java.io.FileNotFoundException;
 
 public class Parser {
     static final List<String> PRIMARIES = Arrays.asList("movie", "director");
@@ -12,83 +14,112 @@ public class Parser {
         Arrays.asList("director", "name", "release_year", "nominations", "rating", "duration", "genre");
     static final List<String> SECONDARIES_DIRECTOR =
         Arrays.asList("year", "director", "birth_year", "gender");
+    static final String USER = "root";
+    static final String PASSWORD = "IsCuH9LYnXtoSUze";
 
     // Eadoin and Zach need to be involved with this, but we can create a dummy table in the meantime.
     public static boolean loadTables() {
         // This method connects to the database and populates the tables
+        try{
+            //Establish connection to database
+            Connection con;
+            Class.forName("com.mysql.jdbc.Driver");
+            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/", USER, PASSWORD);
+
+            Statement stmt = con.createStatement();
+            stmt.execute("CREATE TABLE movies(Title varchar(100),Year int,Nominations int,Rating double,Duration int,Genre varchar(20),PRIMARY KEY (Year));");
+            stmt.execute("CREATE TABLE directors(ID int,Year int,Name varchar(100),BirthYear int,Gender char(1),PRIMARY KEY (ID),FOREIGN KEY (Year) REFERENCES Movie(Year));");
+
+            stmt.close();
+            con.close();
+        } catch (Exception e){
+            System.out.println(e);
+        }
+        populateTable2("movies", "BestMovies.csv");
+        populateTable1("directors", "MovieDirectors.csv");
+        
         return false;
     }
 
     // Eadoin and Zach
     public static boolean populateTable1(String table, String csv) {
-        public static final String delimiter = ",";
-
-        // This reads the data from the csv
-        public static void read(String csvFile) {
+        final String DELIMITER = ",";
             try {
-                File file = new File(csvFile);
-                FileReader fr = new FileReader(file);
-                BufferedReader br = new BufferedReader(fr);
+                File file = new File(csv);
+                Scanner fr = new Scanner(file);
+                Class.forName("com.mysql.jdbc.Driver");
+                Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/moviedirectors", USER, PASSWORD);
+                Statement stmt = con.createStatement();
                 String line = "";
                 String[] tempArr;
-                while((line = br.readLine()) != null) {
-                    tempArr = line.split(delimiter);
+                while(fr.hasNextLine()) {
+                    tempArr = line.split(DELIMITER);
                     for(String tempStr : tempArr) {
                         System.out.print(tempStr + " ");
                     }
                     System.out.println();
                 }
-                br.close();
-            } catch(IOException ioe) {
+                fr.close();
+            } catch(FileNotFoundException ioe) {
                 ioe.printStackTrace();
+            } catch(Exception e){
+
             }
-        }
-        public static void main(String[] args) {
-            // csv file to read
-            String csvFile = "MovieDirectors.csv";
-            CSVReaderTest.read(csvFile);
-        }
+        
         // This method adds the data from the MovieDirectors csv into the table, returns boolean for
         // whether it was successful or not.
         return false;
     }
 
     public static boolean populateTable2(String table, String csv) {
-        public static final String delimiter = ",";
-
-        // This reads the data from the csv
-        public static void read(String csvFile) {
+        final String DELIMITER = ",";
             try {
-                File file = new File(csvFile);
-                FileReader fr = new FileReader(file);
-                BufferedReader br = new BufferedReader(fr);
+                File file = new File(csv);
+                Scanner fr = new Scanner(file);
                 String line = "";
                 String[] tempArr;
-                while((line = br.readLine()) != null) {
-                    tempArr = line.split(delimiter);
+                while(fr.hasNextLine()) {
+                    tempArr = line.split(DELIMITER);
                     for(String tempStr : tempArr) {
                         System.out.print(tempStr + " ");
                     }
                     System.out.println();
                 }
-                br.close();
-            } catch(IOException ioe) {
+                fr.close();
+            } catch(FileNotFoundException ioe) {
                 ioe.printStackTrace();
             }
-        }
-        public static void main(String[] args) {
-            // csv file to read
-            String csvFile = "BestMovies.csv";
-            CSVReaderTest.read(csvFile);
-        }
-        // This method adds the data from the BestMovies csv into the table, returns boolean for
+        
+        // This method adds the data from the MovieDirectors csv into the table, returns boolean for
         // whether it was successful or not.
         return false;
     }
 
     // All of us
     public static String findData(String group1, String group2, String group3) {
-        
+        try{
+            Class.forName("com.mysql.jdbc.Driver");
+            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/moviedirectors", USER, PASSWORD);
+            Statement stmt = con.createStatement();
+
+            String sql = "SELECT " + group1 + " FROM ";
+            if(group2 == "movie"){
+                sql = sql + " movies WHERE title = `" + group3 + "`;";
+            } else {
+                sql = sql + " directors WHERE name = `" + group3 + "`;";
+            }
+
+            ResultSet rs = stmt.executeQuery(sql);
+            String result = rs.toString();
+
+            rs.close();
+            stmt.close();
+            con.close();
+            return result;
+            
+        } catch (Exception e){
+
+        }
 
         // Takes the parameters from the regEx and inputs them into an SQL query. Returns
         // the information returned by the SQL statement
