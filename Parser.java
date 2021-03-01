@@ -24,11 +24,11 @@ public class Parser {
             //Establish connection to database
             Connection con;
             Class.forName("com.mysql.jdbc.Driver");
-            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/", USER, PASSWORD);
+            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/moviedirectors", USER, PASSWORD);
 
             Statement stmt = con.createStatement();
-            stmt.execute("CREATE TABLE movies(Title varchar(100),Year int,Nominations int,Rating double,Duration int,Genre varchar(20),PRIMARY KEY (Year));");
-            stmt.execute("CREATE TABLE directors(ID int,Year int,Name varchar(100),BirthYear int,Gender char(1),PRIMARY KEY (ID),FOREIGN KEY (Year) REFERENCES Movie(Year));");
+            stmt.execute("CREATE TABLE movies(title varchar(100),release_year int,nominations int,rating double,duration int,genre varchar(20),PRIMARY KEY (release_year));");
+            stmt.execute("CREATE TABLE directors(id int,release_year int,name varchar(100),birth_year int,gender char(1),PRIMARY KEY (ID),FOREIGN KEY (release_year) REFERENCES movies(release_year));");
 
             stmt.close();
             con.close();
@@ -51,19 +51,23 @@ public class Parser {
                 Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/moviedirectors", USER, PASSWORD);
                 Statement stmt = con.createStatement();
                 String line = "";
+                String sql = "";
                 String[] tempArr;
                 while(fr.hasNextLine()) {
+                    line = fr.nextLine();
                     tempArr = line.split(DELIMITER);
-                    for(String tempStr : tempArr) {
-                        System.out.print(tempStr + " ");
-                    }
-                    System.out.println();
+                    sql = "INSERT INTO directors (id, release_year, name, birth_year, gender) VALUES (";
+                    sql = sql + "'" + tempArr[0] + "', '" + tempArr[1] + "', '"+ tempArr[2] + "', '"+ tempArr[3] + "', '"+ tempArr[4] + "');"; 
+                    stmt.execute(sql);
+                    sql = "";
                 }
                 fr.close();
+                stmt.close();
+                con.close();
             } catch(FileNotFoundException ioe) {
                 ioe.printStackTrace();
             } catch(Exception e){
-
+                System.out.println(e);
             }
         
         // This method adds the data from the MovieDirectors csv into the table, returns boolean for
@@ -76,18 +80,27 @@ public class Parser {
             try {
                 File file = new File(csv);
                 Scanner fr = new Scanner(file);
+                Class.forName("com.mysql.jdbc.Driver");
+                Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/moviedirectors", USER, PASSWORD);
+                Statement stmt = con.createStatement();
                 String line = "";
+                String sql = "";
                 String[] tempArr;
                 while(fr.hasNextLine()) {
+                    line = fr.nextLine();
                     tempArr = line.split(DELIMITER);
-                    for(String tempStr : tempArr) {
-                        System.out.print(tempStr + " ");
-                    }
-                    System.out.println();
+                    sql = "INSERT INTO movies (title, release_year, nominations, rating, duration, genre) VALUES (";
+                    sql = sql + "'" + tempArr[0] + "', '" + tempArr[1] + "', '"+ tempArr[2] + "', '"+ tempArr[3] + "', '"+ tempArr[4] + "', '"+ tempArr[5] +"');"; 
+                    stmt.execute(sql);
+                    sql = "";
                 }
                 fr.close();
+                stmt.close();
+                con.close();
             } catch(FileNotFoundException ioe) {
                 ioe.printStackTrace();
+            } catch (Exception e) {
+                System.out.println(e);
             }
         
         // This method adds the data from the MovieDirectors csv into the table, returns boolean for
@@ -103,10 +116,12 @@ public class Parser {
             Statement stmt = con.createStatement();
 
             String sql = "SELECT " + group1 + " FROM ";
-            if(group2 == "movie"){
-                sql = sql + " movies WHERE title = `" + group3 + "`;";
+            if(group2.equals("movie")){
+                sql = sql + " movies WHERE title = '" + group3 + "';";
+            } else if (group2.equals("director")) {
+                sql = sql + " directors WHERE name = '" + group3 + "';";
             } else {
-                sql = sql + " directors WHERE name = `" + group3 + "`;";
+                
             }
 
             ResultSet rs = stmt.executeQuery(sql);
@@ -118,7 +133,7 @@ public class Parser {
             return result;
             
         } catch (Exception e){
-
+            System.out.println(e);
         }
 
         // Takes the parameters from the regEx and inputs them into an SQL query. Returns
@@ -244,6 +259,22 @@ public class Parser {
     public static void main(String[] args) {
         Scanner input = new Scanner(System.in);
         String userInput = "";
+
+        //Password here
+        
+        //Check to see if databases have been loaded
+        try{
+            Class.forName("com.mysql.jdbc.Driver");
+            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/moviedirectors", USER, PASSWORD);
+            Statement stmt = con.createStatement();
+
+            ResultSet rs = stmt.executeQuery("SELECT title FROM movies WHERE year = 2014");
+            
+        } catch (Exception e){
+            System.out.println("Loading tables...");
+            loadTables();
+            System.out.println("Tables Loaded!");
+        }
 
         //menu and input loop
         System.out.println("Welcome to the Best Picture data helper");
