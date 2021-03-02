@@ -15,7 +15,7 @@ public class Parser {
     static final List<String> SECONDARIES_DIRECTOR =
         Arrays.asList("year", "director", "birth_year", "gender");
     static final String USER = "root";
-    static final String PASSWORD = "IsCuH9LYnXtoSUze";
+    static String PASSWORD = "IsCuH9LYnXtoSUze";
 
     // Eadoin and Zach need to be involved with this, but we can create a dummy table in the meantime.
     public static boolean loadTables() {
@@ -305,6 +305,8 @@ public class Parser {
             
         } catch (Exception e){
             System.out.println("Loading tables...");
+            System.out.println("Enter your password to the database: ");
+            PASSWORD = input.nextLine();
             loadTables();
             System.out.println("Tables Loaded!");
         }
