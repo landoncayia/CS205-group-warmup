@@ -151,6 +151,15 @@ public class Parser {
     // Isabelle
     public static void printData(String data) {
         // uses output from findData to print the requested data
+        if(data.equals("m")){
+            System.out.println("Male");
+        }
+        else if(data.equals("f")){
+            System.out.println("Female");
+        }
+        else{
+            System.out.println(data);
+        }
     }
 
     // Landon
