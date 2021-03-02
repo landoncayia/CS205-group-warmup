@@ -23,29 +23,37 @@ public class Parser {
         try{
             //Establish connection to database
             Connection con;
-            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/moviedirectors", USER, PASSWORD);
+            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/", USER, PASSWORD);
 
+            //Creates Database
             Statement stmt = con.createStatement();
-            stmt.execute("CREATE TABLE movies(title varchar(100),release_year int,nominations int,rating double,duration int,genre varchar(20),PRIMARY KEY (release_year));");
-            stmt.execute("CREATE TABLE directors(id int,release_year int,name varchar(100),birth_year int,gender char(1),PRIMARY KEY (ID),FOREIGN KEY (release_year) REFERENCES movies(release_year));");
+            stmt.executeUpdate("CREATE DATABASE moviedirectors");
+
+            //Establishes Connection to created database
+            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/moviedirectors", USER, PASSWORD);
+            stmt = con.createStatement();
+
+            //Creates table
+            stmt.executeUpdate("CREATE TABLE movies(title varchar(100),release_year int,nominations int,rating double,duration int,genre varchar(20),PRIMARY KEY (release_year));");
+            stmt.executeUpdate("CREATE TABLE directors(id int,release_year int,name varchar(100),birth_year int,gender char(1),PRIMARY KEY (ID),FOREIGN KEY (release_year) REFERENCES movies(release_year));");
 
             stmt.close();
             con.close();
         } catch (Exception e){
             System.out.println(e);
         }
-        populateTable2("movies", "BestMovies.csv");
-        populateTable1("directors", "MovieDirectors.csv");
+        populateTableMovies();
+        populateTableDirectors();
         
         return false;
     }
 
     // Eadoin and Zach
-    public static boolean populateTable1(String table, String csv) {
+    public static boolean populateTableDirectors() {
         final String DELIMITER = ",";
             try {
                 //Initialize reader and connection to database
-                File file = new File(csv);
+                File file = new File("MovieDirectors.csv");
                 Scanner fr = new Scanner(file);
                 Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/moviedirectors", USER, PASSWORD);
                 Statement stmt = con.createStatement();
@@ -61,7 +69,7 @@ public class Parser {
                     tempArr = line.split(DELIMITER);
                     sql = "INSERT INTO directors (id, release_year, name, birth_year, gender) VALUES (";
                     sql = sql + "'" + Integer.parseInt(tempArr[0]) + "', '" + Integer.parseInt(tempArr[1]) + "', '"+ tempArr[2] + "', '"+ Integer.parseInt(tempArr[3]) + "', '"+ tempArr[4] + "');"; 
-                    stmt.execute(sql);
+                    stmt.executeUpdate(sql);
                     sql = "";
                 }
                 //Closing connections
@@ -79,11 +87,11 @@ public class Parser {
         return false;
     }
 
-    public static boolean populateTable2(String table, String csv) {
+    public static boolean populateTableMovies() {
         final String DELIMITER = ",";
             try {
                 //Initialize reader and connection to database
-                File file = new File(csv);
+                File file = new File("BestMovies.csv");
                 Scanner fr = new Scanner(file);
                 Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/moviedirectors", USER, PASSWORD);
                 Statement stmt = con.createStatement();
@@ -99,7 +107,7 @@ public class Parser {
                     tempArr = line.split(DELIMITER);
                     sql = "INSERT INTO movies (title, release_year, nominations, rating, duration, genre) VALUES (";
                     sql = sql + "\"" + tempArr[0] + "\", '" + Integer.parseInt(tempArr[1]) + "', '"+ Integer.parseInt(tempArr[2]) + "', '"+ tempArr[3] + "', '"+ Integer.parseInt(tempArr[4]) + "', '"+ tempArr[5] +"');"; 
-                    stmt.execute(sql);
+                    stmt.executeUpdate(sql);
                     sql = "";
                 }
                 //Closing connections
