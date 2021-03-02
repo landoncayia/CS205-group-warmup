@@ -23,7 +23,6 @@ public class Parser {
         try{
             //Establish connection to database
             Connection con;
-            Class.forName("com.mysql.jdbc.Driver");
             con = DriverManager.getConnection("jdbc:mysql://localhost:3306/moviedirectors", USER, PASSWORD);
 
             Statement stmt = con.createStatement();
@@ -45,22 +44,27 @@ public class Parser {
     public static boolean populateTable1(String table, String csv) {
         final String DELIMITER = ",";
             try {
+                //Initialize reader and connection to database
                 File file = new File(csv);
                 Scanner fr = new Scanner(file);
-                Class.forName("com.mysql.jdbc.Driver");
                 Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/moviedirectors", USER, PASSWORD);
                 Statement stmt = con.createStatement();
+                //Initialize Strings for line input and sql statement
                 String line = "";
                 String sql = "";
                 String[] tempArr;
+                //Skipping the first line of headers
+                fr.nextLine();
+                //Looping and adding csv content to table
                 while(fr.hasNextLine()) {
                     line = fr.nextLine();
                     tempArr = line.split(DELIMITER);
                     sql = "INSERT INTO directors (id, release_year, name, birth_year, gender) VALUES (";
-                    sql = sql + "'" + tempArr[0] + "', '" + tempArr[1] + "', '"+ tempArr[2] + "', '"+ tempArr[3] + "', '"+ tempArr[4] + "');"; 
+                    sql = sql + "'" + Integer.parseInt(tempArr[0]) + "', '" + Integer.parseInt(tempArr[1]) + "', '"+ tempArr[2] + "', '"+ Integer.parseInt(tempArr[3]) + "', '"+ tempArr[4] + "');"; 
                     stmt.execute(sql);
                     sql = "";
                 }
+                //Closing connections
                 fr.close();
                 stmt.close();
                 con.close();
@@ -78,22 +82,27 @@ public class Parser {
     public static boolean populateTable2(String table, String csv) {
         final String DELIMITER = ",";
             try {
+                //Initialize reader and connection to database
                 File file = new File(csv);
                 Scanner fr = new Scanner(file);
-                Class.forName("com.mysql.jdbc.Driver");
                 Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/moviedirectors", USER, PASSWORD);
                 Statement stmt = con.createStatement();
+                //Initialize Strings for line input and sql statement
                 String line = "";
                 String sql = "";
                 String[] tempArr;
+                //Skipping the first line of headers
+                fr.nextLine();
+                //Looping and adding csv content to table
                 while(fr.hasNextLine()) {
                     line = fr.nextLine();
                     tempArr = line.split(DELIMITER);
                     sql = "INSERT INTO movies (title, release_year, nominations, rating, duration, genre) VALUES (";
-                    sql = sql + "'" + tempArr[0] + "', '" + tempArr[1] + "', '"+ tempArr[2] + "', '"+ tempArr[3] + "', '"+ tempArr[4] + "', '"+ tempArr[5] +"');"; 
+                    sql = sql + "\"" + tempArr[0] + "\", '" + Integer.parseInt(tempArr[1]) + "', '"+ Integer.parseInt(tempArr[2]) + "', '"+ tempArr[3] + "', '"+ Integer.parseInt(tempArr[4]) + "', '"+ tempArr[5] +"');"; 
                     stmt.execute(sql);
                     sql = "";
                 }
+                //Closing connections
                 fr.close();
                 stmt.close();
                 con.close();
@@ -111,7 +120,6 @@ public class Parser {
     // All of us
     public static String findData(String group1, String group2, String group3) {
         try{
-            Class.forName("com.mysql.jdbc.Driver");
             Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/moviedirectors", USER, PASSWORD);
             Statement stmt = con.createStatement();
 
@@ -264,11 +272,10 @@ public class Parser {
         
         //Check to see if databases have been loaded
         try{
-            Class.forName("com.mysql.jdbc.Driver");
             Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/moviedirectors", USER, PASSWORD);
             Statement stmt = con.createStatement();
 
-            ResultSet rs = stmt.executeQuery("SELECT title FROM movies WHERE year = 2014");
+            ResultSet rs = stmt.executeQuery("SELECT title FROM movies WHERE release_year = 2014");
             
         } catch (Exception e){
             System.out.println("Loading tables...");
