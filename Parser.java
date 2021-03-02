@@ -131,18 +131,27 @@ public class Parser {
             Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/moviedirectors", USER, PASSWORD);
             Statement stmt = con.createStatement();
 
-            String sql = "SELECT " + group1 + " FROM ";
+            String sql = "SELECT " + group2 + "s." + group1 + " FROM movies JOIN directors ON movies.release_year = directors.release_year WHERE ";
             if(group2.equals("movie")){
-                sql = sql + " movies WHERE title = '" + group3 + "';";
-            } else if (group2.equals("director")) {
-                sql = sql + " directors WHERE name = '" + group3 + "';";
+                sql = sql + "movies.title LIKE \"%" + group3 + "%\";";
+            } else if(group2.equals("director")){
+                sql = sql + "directors.name LIKE \"" + group3 + "\";";
             } else {
-                
+                System.out.println(group2);
+                if(group1.equals("release_year")){
+                    sql = "SELECT movies." + group1 + " FROM movies JOIN directors ON movies.release_year = directors.release_year WHERE ";
+                } else {
+                    sql = "SELECT " + group1 + " FROM movies JOIN directors ON movies.release_year = directors.release_year WHERE ";
+                }
+                sql = sql + "movies.title OR directors.name LIKE \"%" + group3 + "%\"";
             }
-
+            System.out.println(sql);
+            String result = "No data found for " + group3;
             ResultSet rs = stmt.executeQuery(sql);
-            String result = rs.toString();
-
+            if(rs.next()){
+                result = rs.getString(group1);
+            }
+            System.out.println(result);
             rs.close();
             stmt.close();
             con.close();
