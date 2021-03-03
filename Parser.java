@@ -11,11 +11,11 @@ import java.io.FileNotFoundException;
 public class Parser {
     static final List<String> PRIMARIES = Arrays.asList("movie", "director");
     static final List<String> SECONDARIES_MOVIE =
-        Arrays.asList("director", "name", "release_year", "nominations", "rating", "duration", "genre");
+        Arrays.asList("director", "title", "release_year", "nominations", "rating", "duration", "genre");
     static final List<String> SECONDARIES_DIRECTOR =
         Arrays.asList("year", "director", "birth_year", "gender");
     static final String USER = "root";
-    static String PASSWORD = "IsCuH9LYnXtoSUze";
+    static String PASSWORD = "";
 
     // Eadoin and Zach need to be involved with this, but we can create a dummy table in the meantime.
     public static boolean loadTables() {
@@ -35,15 +35,18 @@ public class Parser {
 
             //Creates table
             stmt.executeUpdate("CREATE TABLE movies(title varchar(100),release_year int,nominations int,rating double,duration int,genre varchar(20),PRIMARY KEY (release_year));");
-            stmt.executeUpdate("CREATE TABLE directors(id int,release_year int,name varchar(100),birth_year int,gender char(1),PRIMARY KEY (ID),FOREIGN KEY (release_year) REFERENCES movies(release_year));");
+            stmt.executeUpdate("CREATE TABLE directors(id int,year int,name varchar(100),birth_year int,gender char(1),PRIMARY KEY (ID),FOREIGN KEY (year) REFERENCES movies(release_year));");
 
             stmt.close();
             con.close();
+            populateTableMovies();
+            populateTableDirectors();
+            System.out.println("Tables Loaded!");
         } catch (Exception e){
             System.out.println(e);
+            System.out.println("Tables not able to be loaded.");
         }
-        populateTableMovies();
-        populateTableDirectors();
+        
         
         return false;
     }
@@ -67,7 +70,7 @@ public class Parser {
                 while(fr.hasNextLine()) {
                     line = fr.nextLine();
                     tempArr = line.split(DELIMITER);
-                    sql = "INSERT INTO directors (id, release_year, name, birth_year, gender) VALUES (";
+                    sql = "INSERT INTO directors (id, year, name, birth_year, gender) VALUES (";
                     sql = sql + "'" + Integer.parseInt(tempArr[0]) + "', '" + Integer.parseInt(tempArr[1]) + "', '"+ tempArr[2] + "', '"+ Integer.parseInt(tempArr[3]) + "', '"+ tempArr[4] + "');"; 
                     stmt.executeUpdate(sql);
                     sql = "";
@@ -130,20 +133,24 @@ public class Parser {
         try{
             Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/moviedirectors", USER, PASSWORD);
             Statement stmt = con.createStatement();
-
-            String sql = "SELECT " + group2 + "s." + group1 + " FROM movies JOIN directors ON movies.release_year = directors.release_year WHERE ";
-            if(group2.equals("movie")){
+            //Correcting "Director" when looking for the director of a movie
+            if(group1.equals("director")){
+                group1 = "name";
+            }
+            //Starts SQL statement
+            String sql = "SELECT " + group1 + " FROM movies JOIN directors ON movies.release_year = directors.year WHERE ";
+            if(group2.equals("movie")){ //If looking for something based on the movie title
                 sql = sql + "movies.title LIKE \"%" + group3 + "%\";";
-            } else if(group2.equals("director")){
-                sql = sql + "directors.name LIKE \"" + group3 + "\";";
-            } else {
-                System.out.println(group2);
-                if(group1.equals("release_year")){
-                    sql = "SELECT movies." + group1 + " FROM movies JOIN directors ON movies.release_year = directors.release_year WHERE ";
+            } else if(group2.equals("director")){ //If looking for something based on the directors name
+                sql = sql + "directors.name LIKE \"%" + group3 + "%\";";
+            } else { //Looking cross tables
+                String[] tempGroup;
+                tempGroup = group2.split(" ");
+                if(tempGroup[1].equals("movie")){
+                    sql = sql + "movies.title LIKE \"%" + group3 + "%\";";
                 } else {
-                    sql = "SELECT " + group1 + " FROM movies JOIN directors ON movies.release_year = directors.release_year WHERE ";
+                    sql = sql + "directors.name LIKE \"%" + group3 + "%\";";
                 }
-                sql = sql + "movies.title OR directors.name LIKE \"%" + group3 + "%\"";
             }
             System.out.println(sql);
             String result = "No data found for " + group3;
@@ -151,7 +158,7 @@ public class Parser {
             if(rs.next()){
                 result = rs.getString(group1);
             }
-            System.out.println(result);
+            printData(result);
             rs.close();
             stmt.close();
             con.close();
@@ -191,10 +198,10 @@ public class Parser {
     // Isabelle
     public static void printData(String data) {
         // uses output from findData to print the requested data
-        if(data.equals("m")){
+        if(data.equals("M")){
             System.out.println("Male");
         }
-        else if(data.equals("f")){
+        else if(data.equals("F")){
             System.out.println("Female");
         }
         else{
@@ -295,7 +302,8 @@ public class Parser {
         String userInput = "";
 
         //Password here
-        
+        System.out.println("Enter your password to the database: ");
+        PASSWORD = input.nextLine();
         //Check to see if databases have been loaded
         try{
             Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/moviedirectors", USER, PASSWORD);
@@ -305,10 +313,7 @@ public class Parser {
             
         } catch (Exception e){
             System.out.println("Loading tables...");
-            System.out.println("Enter your password to the database: ");
-            PASSWORD = input.nextLine();
             loadTables();
-            System.out.println("Tables Loaded!");
         }
 
         //menu and input loop
