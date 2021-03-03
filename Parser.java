@@ -152,7 +152,6 @@ public class Parser {
                     sql = sql + "directors.name LIKE \"%" + group3 + "%\";";
                 }
             }
-            System.out.println(sql);
             String result = "No data found for " + group3;
             ResultSet rs = stmt.executeQuery(sql);
             if(rs.next()){
@@ -302,7 +301,7 @@ public class Parser {
         String userInput = "";
 
         //Password here
-        System.out.println("Enter your password to the database: ");
+        System.out.println("Enter your SQL password. If you don't have one, press ENTER: ");
         PASSWORD = input.nextLine();
         //Check to see if databases have been loaded
         try{
